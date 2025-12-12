@@ -423,7 +423,7 @@
         h ^= str.charCodeAt(i);
         h = Math.imul(h, 16777619) >>> 0; // FNV prime
       }
-      return h >>> 0;
+      return h;
     }
 
     /**
@@ -482,6 +482,24 @@
     function getCardColor(card) {
       return (card.includes('♥') || card.includes('♦')) ? 'red' : 'black';
     }
+
+    /**
+     * 取得牌堆顯示文字
+     * @returns {string} 牌堆顯示文字
+     */
+    function getDeckDisplayText() {
+      if (!gameState.shuffled) {
+        return '尚未洗牌';
+      }
+      return gameState.deck.length > 0 
+        ? gameState.deck.join(', ')
+        : '牌堆已空';
+    }
+
+    // ========== 常數定義 ==========
+
+    const MESSAGE_AUTO_HIDE_DELAY = 3000; // 訊息自動隱藏延遲（毫秒）
+    const COMPLETION_MESSAGE_DELAY = 500; // 完成訊息顯示延遲（毫秒）
 
     // ========== 遊戲狀態 ==========
 
@@ -575,7 +593,7 @@
       if (gameState.deck.length === 0) {
         setTimeout(() => {
           showMessage('🎉 所有牌都已抽完！', 'info');
-        }, 500);
+        }, COMPLETION_MESSAGE_DELAY);
       }
     }
 
@@ -625,14 +643,7 @@
       // 更新完整牌堆顯示（如果已顯示）
       const deckDisplay = document.getElementById('deckDisplay');
       if (deckDisplay.style.display !== 'none') {
-        if (!gameState.shuffled) {
-          deckDisplay.textContent = '尚未洗牌';
-        } else {
-          const deckText = gameState.deck.length > 0 
-            ? gameState.deck.join(', ')
-            : '牌堆已空';
-          deckDisplay.textContent = deckText;
-        }
+        deckDisplay.textContent = getDeckDisplayText();
       }
 
       // 更新抽牌按鈕狀態
@@ -652,14 +663,7 @@
         toggleText.textContent = '隱藏';
         
         // 更新牌堆內容
-        if (!gameState.shuffled) {
-          deckDisplay.textContent = '尚未洗牌';
-        } else {
-          const deckText = gameState.deck.length > 0 
-            ? gameState.deck.join(', ')
-            : '牌堆已空';
-          deckDisplay.textContent = deckText;
-        }
+        deckDisplay.textContent = getDeckDisplayText();
       } else {
         deckDisplay.style.display = 'none';
         toggleText.textContent = '顯示';
@@ -676,10 +680,10 @@
       messageDiv.textContent = msg;
       messageDiv.className = `message ${type} show`;
 
-      // 3 秒後自動隱藏
+      // 自動隱藏訊息
       setTimeout(() => {
         messageDiv.classList.remove('show');
-      }, 3000);
+      }, MESSAGE_AUTO_HIDE_DELAY);
     }
 
     // ========== 初始化 ==========
